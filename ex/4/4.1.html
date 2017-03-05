@@ -44,8 +44,7 @@
 			var petalMaterial = new THREE.MeshBasicMaterial({ color: 0xe06030 });
 			for (var i = 0; i < 24; i++) {
 				var petal = new THREE.Mesh(petalGeometry, petalMaterial);
-				petal.position.y = stemGeometry.parameters.height / 2;	// one could dinamically change
-																		// the length of the stem
+				petal.position.y = stemGeometry.parameters.height / 2;
 				petal.position.z = petalGeometry.parameters.height / 2;
 				petal.rotation.x = -Math.PI / 2;
 
