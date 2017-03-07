@@ -37,15 +37,13 @@
 			octaGeometry.vertices.push(new THREE.Vector3(0, 1/Math.sqrt(2), 0));	// 4
 			octaGeometry.vertices.push(new THREE.Vector3(0, -1/Math.sqrt(2), 0));	// 5
 
-			for (var i = 0; i < 4; i++) {
-				octaGeometry.faces.push(new THREE.Face3(4, i, (i+1) % 4));	// 4 faces would be sufficient
+			for (var i = 0; i < 4; i++) { // 4 faces would be sufficient
+				octaGeometry.faces.push(new THREE.Face3(4, i, (i+1) % 4));
 				octaGeometry.faces.push(new THREE.Face3(i, (i+1) % 4, 5));
 			}
 
-			var octahedron = new THREE.Mesh(
-				octaGeometry, 
-				new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-				);
+			var octaMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+			var octahedron = new THREE.Mesh(octaGeometry, octaMaterial);
 			octahedron.position.y = 0.5;
 			scene.add(octahedron);
 
@@ -60,6 +58,7 @@
 				requestAnimationFrame(render);
 				
 				octahedron.rotation.y += 0.01;
+				
 				stats.update();
 				
 				renderer.render(scene, camera);

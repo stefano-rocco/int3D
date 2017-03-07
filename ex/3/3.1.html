@@ -38,23 +38,21 @@
 			quadGeometry.faces.push(new THREE.Face3(1, 0, 2));
 			quadGeometry.faces.push(new THREE.Face3(1, 2, 3));
 
-			var quads = []
+			var quads = [];
 			var cube = new THREE.Object3D();
-			var colors = [ 0xffffff, 0xffff00,
-						   0xff0000, 0xff8000,
-						   0x00ff00, 0x0000ff ];
+			var colors = [ 0xffffff, 0xffff00,		// 1st pair
+						   0xff0000, 0xff8000,		// 2nd pair
+						   0x00ff00, 0x0000ff ];	// 3rd pair
 
 			for (var i = 0; i < 6; i++) {
-				quads[i] = new THREE.Mesh(
-					quadGeometry, 
-					new THREE.MeshBasicMaterial({ color: colors[i] })
-					);
-				quads[i].rotation.y = i%2 * Math.PI;	// rotate on y to form couples, so that
-														// x-rotation (problematic) won't affect
-														// the first one later on
+				var quadMaterial = new THREE.MeshBasicMaterial({ color: colors[i] });
+				quads[i] = new THREE.Mesh(quadGeometry, quadMaterial);
+
+				var rotVector = new THREE.Vector3(0, i%2 * Math.PI, 0);	// displace quads to form pairs along Z:
+																		// in this case gimbals' orientation is
+																		// safe for the next rotation
 				var j = Math.floor(i/2);
-				var rotVector = quads[i].rotation.toVector3();
-				rotVector.setComponent(j, rotVector.getComponent(j) + Math.PI/2);
+				rotVector.setComponent(j, rotVector.getComponent(j) + Math.PI/2);	// rotate pairs
 				quads[i].rotation.setFromVector3(rotVector);
 
 				cube.add(quads[i]);

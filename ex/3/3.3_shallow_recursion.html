@@ -31,15 +31,17 @@
 
 			var geometry = new THREE.Geometry();
 
-			// build initial octahedron
-			var vertex = new THREE.Vector3(-1 / Math.sqrt(2), 0, 1 / Math.sqrt(2));
-			for (var i = 0; i < 8; i++) {	// use 3 vertices for each face for simplicity
-				geometry.vertices.push(vertex);
-				vertex = new THREE.Vector3(-vertex.getComponent(2), 0, vertex.getComponent(0));
-				geometry.vertices.push(vertex.clone());
-				geometry.vertices.push(new THREE.Vector3(0, Math.pow(-1, Math.floor(i/4)), 0));
+			// build initial octahedron; use 3 vertices for each face for simplicity
+			var trisGeometry = new THREE.Geometry();
+			var p = 1 / Math.sqrt(2);
+			trisGeometry.vertices.push(new THREE.Vector3(-p, 0, p));
+			trisGeometry.vertices.push(new THREE.Vector3(p, 0, p));
+			trisGeometry.vertices.push(new THREE.Vector3(0, 1, 0));
+			trisGeometry.faces.push(new THREE.Face3(0, 1, 2));
 
-				geometry.faces.push(new THREE.Face3(i*3, i*3 + 1, i*3 + 2));
+			for (var i = 0; i < 4; i++) {
+				geometry.merge(trisGeometry.rotateY(i * Math.PI/2));
+				geometry.merge(trisGeometry.rotateX(Math.PI));
 			}
 
 			function subdivide(n) {
@@ -76,18 +78,6 @@
 				}
 			}
 
-			function findGetParameter(parameterName) {
-
-			    var items = location.search.substr(1).split("&");
-			    for (var i = 0; i < items.length; i++) {
-			    	var tmp = items[i].split("=");
-			        if (tmp[0] === parameterName) {
-			        	return decodeURIComponent(tmp[1]);
-			        }
-			    }
-			    return null;
-			}
-
 			subdivide(findGetParameter('n'));	// use HTML GET parameter n
 
 			var material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
@@ -106,12 +96,29 @@
 				requestAnimationFrame(render);
 				
 				sphere.rotation.y += 0.01;
+
 				stats.update();
 				
 				renderer.render(scene, camera);
 			}
 			render();
 
+			/* ----------------------------------------------------------------------------------*/
+			function findGetParameter(parameterName) {
+
+			    var items = location.search.substr(1).split("&");
+			    for (var i = 0; i < items.length; i++) {
+			    	var tmp = items[i].split("=");
+			        if (tmp[0] === parameterName) {
+			        	return decodeURIComponent(tmp[1]);
+			        }
+			    }
+			    return null;
+			}
+
 		</script>
+		<div style="position:absolute; top:0; left:0; right:0; margin:0 auto; text-align:center">
+			<form method="get">n <input type="text" name="n" style="width:20px" autofocus></form>
+		</div>
 	</body>
 </html>

@@ -1,1 +1,0 @@
-Use HTML GET parameter of the form n=<number_of_subdivisions>
