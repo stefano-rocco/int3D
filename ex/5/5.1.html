@@ -1,0 +1,153 @@
+<html>
+	<head>
+		<title>Ex 5.1</title>
+		<style>
+		body {
+			font-family: Monospace;
+			background-color: #f0f0f0;
+			margin: 0px;
+			overflow: hidden;
+		}
+		
+		canvas { 
+			width: 100%; 
+			height: 100%;
+		}
+		</style>
+		<script src="../../lib/three.min.js"></script>
+		<script src="../../lib/stats.min.js"></script>
+		<script src="../../lib/OrbitControls.js"></script>
+	</head>
+	<body>
+		
+		<script>
+
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+			var renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.setClearColor(0xf0f0f0);
+			document.body.appendChild(renderer.domElement);
+
+			var planets = [								// cube root scale
+				{		// moon
+					radius: 0.14,
+					distance: 0.82,
+					tiltAngle: -6.68 * Math.PI/180,		// resp to ecliptic
+					orbTiltAngle: 5.15 * Math.PI/180,	// resp. to earth
+					rotAngle: 1/27.32 * 2*Math.PI,
+					revAngle: 1/27.32 * 2*Math.PI,
+					color: 'white'
+				}, {	// earth
+					radius: 0.21,
+					distance: 6.00,
+					tiltAngle: -23.44 * Math.PI/180,	// resp to ecliptic
+					orbTiltAngle: 0,					// resp. to sun
+					rotAngle: 2*Math.PI,
+					revAngle: 1/365.26 * 2*Math.PI,
+					color: 'skyblue'
+				}, {	// sun
+					radius: 1,
+					color: 'yellow'
+				}];
+
+			var geometry = new THREE.SphereGeometry(1, 16, 16);
+
+			var arrowGeometry = new THREE.CylinderGeometry(1, 1, 3, 8);
+			arrowGeometry.translate(0, arrowGeometry.parameters.height/2, 0);
+			var helperMaterial = new THREE.MeshBasicMaterial({ color: 'red' });
+
+			for (var i = 0; i < planets.length; i++) {
+				var material = new THREE.MeshBasicMaterial({ color: planets[i].color, wireframe: true });
+				planets[i].mesh = new THREE.Mesh(geometry, material);
+
+				// arrow
+				var arrow = new THREE.Mesh(arrowGeometry, helperMaterial);
+				arrow.scale.set(.01/planets[i].radius, 1, .01/planets[i].radius);
+				arrow.rotation.z = Math.PI/2;
+				planets[i].mesh.add(arrow);
+
+				planets[i].pivot = new THREE.Object3D();	// attach planet + child subsystem
+				planets[i].pivot.add(planets[i].mesh);
+
+				planets[i].totRotAngle = 0;	// for later use
+				planets[i].totRevAngle = 0;	// for later use
+			}
+
+			var orbitGeometry = new THREE.CircleGeometry(1, 128);
+			var orbitEdges = new THREE.EdgesGeometry(orbitGeometry);
+
+			for (var i = 0; i < planets.length-1; i++) {
+				// orbit
+				orbit = new THREE.LineSegments(orbitEdges, helperMaterial);
+				orbit.scale.set(planets[i].distance, planets[i].distance, 1);
+				orbit.rotation.set(Math.PI/2, planets[i].orbTiltAngle, 0);
+				planets[i+1].pivot.add(orbit);
+
+				planets[i+1].pivot.add(planets[i].pivot);
+			}
+
+			scene.add(planets[planets.length-1].pivot);
+			
+
+			var controls = new THREE.OrbitControls(camera);
+			controls.addEventListener('change', render);
+
+			stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild(stats.domElement);
+
+			camera.position.set(0, 5, 8);
+			camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+
+			var yAxis = new THREE.Vector3(0, 1, 0);
+			var zAxis = new THREE.Vector3(0, 0, 1);
+
+			function update(old_time) {
+
+				var new_time = Date.now();
+				requestAnimationFrame(function() { update(new_time); });
+				var delta = (new_time - old_time) / 1000;
+
+				for (var i = 0; i < planets.length-1; i++) {	// leave out sun for efficiency
+
+					var planet = planets[i];
+
+					planet.totRotAngle += delta * planet.rotAngle;
+					planet.totRevAngle += delta * planet.revAngle;
+
+					var matrix = planet.mesh.matrix;
+					var new_matrix = new THREE.Matrix4();	// additional operations
+
+					matrix.makeScale(planet.radius, planet.radius, planet.radius);					// scale planet
+					matrix.premultiply(new_matrix.makeRotationAxis(yAxis, planet.totRotAngle));		// rotate
+					matrix.premultiply(new_matrix.makeRotationAxis(zAxis, planet.tiltAngle));		// tilt axis
+					matrix.premultiply(new_matrix.makeRotationAxis(yAxis, -planet.totRevAngle));	// compensate revolution
+
+					matrix = planet.pivot.matrix;
+					matrix.makeTranslation(planet.distance, 0, 0);									// put on orbit
+					matrix.premultiply(new_matrix.makeRotationAxis(yAxis, planet.totRevAngle));		// revolve
+					matrix.premultiply(new_matrix.makeRotationAxis(zAxis, planet.orbTiltAngle));	// tilt orbit
+
+					planet.mesh.matrixAutoUpdate = false;
+					planet.pivot.matrixAutoUpdate = false;
+				}
+
+				controls.update();
+				stats.update();
+
+				render();
+			}
+			
+			function render() {
+				renderer.render(scene, camera);
+			}
+
+			update(Date.now());
+
+		</script>
+	</body>
+</html>

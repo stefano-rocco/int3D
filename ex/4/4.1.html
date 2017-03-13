@@ -42,14 +42,15 @@
 			flower.add(stamen);
 
 			var petalMaterial = new THREE.MeshBasicMaterial({ color: 0xe06030 });
-			for (var i = 0; i < 24; i++) {
+			var numOfPetals = 24;
+			for (var i = 0; i < numOfPetals; i++) {
 				var petal = new THREE.Mesh(petalGeometry, petalMaterial);
 				petal.position.y = stemGeometry.parameters.height / 2;
 				petal.position.z = petalGeometry.parameters.height / 2;
 				petal.rotation.x = -Math.PI / 2;
 
 				var pivot = new THREE.Object3D();	// for petal orientation
-				pivot.rotation.y = Math.PI / 12 * i;
+				pivot.rotation.y = Math.PI / numOfPetals * 2 * i;
 
 				pivot.add(petal);
 				flower.add(pivot);
