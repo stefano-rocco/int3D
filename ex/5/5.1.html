@@ -54,7 +54,7 @@
 
 			var geometry = new THREE.SphereGeometry(1, 16, 16);
 
-			var arrowGeometry = new THREE.CylinderGeometry(1, 1, 3, 8);
+			var arrowGeometry = new THREE.CylinderGeometry(0, 1, 1, 8);
 			arrowGeometry.translate(0, arrowGeometry.parameters.height/2, 0);
 			var helperMaterial = new THREE.MeshBasicMaterial({ color: 'red' });
 
@@ -62,11 +62,13 @@
 				var material = new THREE.MeshBasicMaterial({ color: planets[i].color, wireframe: true });
 				planets[i].mesh = new THREE.Mesh(geometry, material);
 
-				// arrow
-				var arrow = new THREE.Mesh(arrowGeometry, helperMaterial);
-				arrow.scale.set(.01/planets[i].radius, 1, .01/planets[i].radius);
-				arrow.rotation.z = Math.PI/2;
-				planets[i].mesh.add(arrow);
+				// arrows
+				for (var j = 0; j < 2; j++) {
+					var arrow = new THREE.Mesh(arrowGeometry, helperMaterial);
+					arrow.scale.set(.02/planets[i].radius, 2.5, .02/planets[i].radius);
+					arrow.rotation.z = j * Math.PI/2;
+					planets[i].mesh.add(arrow);
+				}
 
 				planets[i].pivot = new THREE.Object3D();	// attach planet + child subsystem
 				planets[i].pivot.add(planets[i].mesh);
