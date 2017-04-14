@@ -57,7 +57,7 @@
 			var amplitude = 1;
 			
 			var sphereMaterial = new THREE.ShaderMaterial({ 
-				uniforms: { amplitude: { type: 'uFloat', value: amplitude }},
+				uniforms: { amplitude: { type: 'f', value: amplitude }},
 				vertexShader: vs,
 				fragmentShader: fs
 			});
@@ -84,7 +84,7 @@
 				requestAnimationFrame(render);
 
 				sphereMaterial.uniforms.amplitude.value = (Math.sin(Date.now()/1000*2)+1)/2;
-					// uniforms are copied
+					// whether uniforms are copied or not is unspecified behavior
 				sphere.rotation.y += 0.01;
 
 				stats.update();
